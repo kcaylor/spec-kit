@@ -7,6 +7,10 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.26] - 2026-02-06
+
+- Add single-branch mode via `SPECIFY_SINGLE_BRANCH` and `.specify/active-feature` support.
+
 ## [0.0.25] - 2026-02-06
 
 - Add `specify package-templates` subcommand to generate agent-specific command files from `templates/commands/`.

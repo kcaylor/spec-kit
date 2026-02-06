@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 # Common functions and variables for all scripts
 
+is_single_branch_mode() {
+    case "${SPECIFY_SINGLE_BRANCH:-}" in
+        1|true|TRUE|yes|YES|on|ON) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# Get repository root, with fallback for non-git repositories
 # Get repository root, with fallback for non-git repositories
 get_repo_root() {
     if git rev-parse --show-toplevel >/dev/null 2>&1; then
@@ -18,6 +26,21 @@ get_current_branch() {
     if [[ -n "${SPECIFY_FEATURE:-}" ]]; then
         echo "$SPECIFY_FEATURE"
         return
+    fi
+
+    # Single-branch mode: prefer active feature file
+    if is_single_branch_mode; then
+        local repo_root
+        repo_root=$(get_repo_root)
+        local active_file="$repo_root/.specify/active-feature"
+        if [[ -f "$active_file" ]]; then
+            local active_feature
+            active_feature=$(head -n 1 "$active_file" | tr -d '\r')
+            if [[ -n "$active_feature" ]]; then
+                echo "$active_feature"
+                return
+            fi
+        fi
     fi
 
     # Then check git if available
@@ -65,6 +88,11 @@ has_git() {
 check_feature_branch() {
     local branch="$1"
     local has_git_repo="$2"
+
+    if is_single_branch_mode; then
+        echo "[specify] Single-branch mode enabled; skipped branch validation" >&2
+        return 0
+    fi
 
     # For non-git repos, we can't enforce branch naming but still provide output
     if [[ "$has_git_repo" != "true" ]]; then
@@ -133,8 +161,13 @@ get_feature_paths() {
         has_git_repo="true"
     fi
 
-    # Use prefix-based lookup to support multiple branches per spec
-    local feature_dir=$(find_feature_dir_by_prefix "$repo_root" "$current_branch")
+    local feature_dir=""
+    if is_single_branch_mode; then
+        feature_dir="$repo_root/specs/$current_branch"
+    else
+        # Use prefix-based lookup to support multiple branches per spec
+        feature_dir=$(find_feature_dir_by_prefix "$repo_root" "$current_branch")
+    fi
 
     cat <<EOF
 REPO_ROOT='$repo_root'
@@ -153,4 +186,3 @@ EOF
 
 check_file() { [[ -f "$1" ]] && echo "  ✓ $2" || echo "  ✗ $2"; }
 check_dir() { [[ -d "$1" && -n $(ls -A "$1" 2>/dev/null) ]] && echo "  ✓ $2" || echo "  ✗ $2"; }
-

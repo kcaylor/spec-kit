@@ -20,6 +20,18 @@ function Get-CurrentBranch {
     if ($env:SPECIFY_FEATURE) {
         return $env:SPECIFY_FEATURE
     }
+
+    # Single-branch mode: prefer active feature file
+    if (Test-SingleBranchMode) {
+        $repoRoot = Get-RepoRoot
+        $activeFile = Join-Path $repoRoot '.specify/active-feature'
+        if (Test-Path $activeFile) {
+            $activeFeature = (Get-Content -Path $activeFile -ErrorAction SilentlyContinue | Select-Object -First 1).Trim()
+            if ($activeFeature) {
+                return $activeFeature
+            }
+        }
+    }
     
     # Then check git if available
     try {
@@ -72,6 +84,11 @@ function Test-FeatureBranch {
         [string]$Branch,
         [bool]$HasGit = $true
     )
+
+    if (Test-SingleBranchMode) {
+        Write-Warning "[specify] Single-branch mode enabled; skipped branch validation"
+        return $true
+    }
     
     # For non-git repos, we can't enforce branch naming but still provide output
     if (-not $HasGit) {
@@ -113,6 +130,18 @@ function Get-FeaturePathsEnv {
     }
 }
 
+function Test-SingleBranchMode {
+    $value = $env:SPECIFY_SINGLE_BRANCH
+    if (-not $value) { return $false }
+    switch ($value.ToLower()) {
+        '1' { return $true }
+        'true' { return $true }
+        'yes' { return $true }
+        'on' { return $true }
+        default { return $false }
+    }
+}
+
 function Test-FileExists {
     param([string]$Path, [string]$Description)
     if (Test-Path -Path $Path -PathType Leaf) {
@@ -134,4 +163,3 @@ function Test-DirHasFiles {
         return $false
     }
 }
-

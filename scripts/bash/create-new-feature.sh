@@ -5,6 +5,7 @@ set -e
 JSON_MODE=false
 SHORT_NAME=""
 BRANCH_NUMBER=""
+SINGLE_BRANCH=false
 ARGS=()
 i=1
 while [ $i -le $# ]; do
@@ -66,6 +67,10 @@ if [ -z "$FEATURE_DESCRIPTION" ]; then
     echo "Usage: $0 [--json] [--short-name <name>] [--number N] <feature_description>" >&2
     exit 1
 fi
+
+case "${SPECIFY_SINGLE_BRANCH:-}" in
+    1|true|TRUE|yes|YES|on|ON) SINGLE_BRANCH=true ;;
+esac
 
 # Function to find the repository root by searching for existing project markers
 find_repo_root() {
@@ -236,7 +241,7 @@ fi
 
 # Determine branch number
 if [ -z "$BRANCH_NUMBER" ]; then
-    if [ "$HAS_GIT" = true ]; then
+    if [ "$HAS_GIT" = true ] && [ "$SINGLE_BRANCH" != true ]; then
         # Check existing branches on remotes
         BRANCH_NUMBER=$(check_existing_branches "$SPECS_DIR")
     else
@@ -272,7 +277,11 @@ if [ ${#BRANCH_NAME} -gt $MAX_BRANCH_LENGTH ]; then
 fi
 
 if [ "$HAS_GIT" = true ]; then
-    git checkout -b "$BRANCH_NAME"
+    if [ "$SINGLE_BRANCH" = true ]; then
+        >&2 echo "[specify] Single-branch mode enabled; skipped branch creation for $BRANCH_NAME"
+    else
+        git checkout -b "$BRANCH_NAME"
+    fi
 else
     >&2 echo "[specify] Warning: Git repository not detected; skipped branch creation for $BRANCH_NAME"
 fi
@@ -287,11 +296,17 @@ if [ -f "$TEMPLATE" ]; then cp "$TEMPLATE" "$SPEC_FILE"; else touch "$SPEC_FILE"
 # Set the SPECIFY_FEATURE environment variable for the current session
 export SPECIFY_FEATURE="$BRANCH_NAME"
 
+# Persist active feature for single-branch workflows
+ACTIVE_FEATURE_FILE="$REPO_ROOT/.specify/active-feature"
+mkdir -p "$(dirname "$ACTIVE_FEATURE_FILE")"
+echo "$BRANCH_NAME" > "$ACTIVE_FEATURE_FILE"
+
 if $JSON_MODE; then
-    printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s"}\n' "$BRANCH_NAME" "$SPEC_FILE" "$FEATURE_NUM"
+    printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s","ACTIVE_FEATURE_FILE":"%s"}\n' "$BRANCH_NAME" "$SPEC_FILE" "$FEATURE_NUM" "$ACTIVE_FEATURE_FILE"
 else
     echo "BRANCH_NAME: $BRANCH_NAME"
     echo "SPEC_FILE: $SPEC_FILE"
     echo "FEATURE_NUM: $FEATURE_NUM"
     echo "SPECIFY_FEATURE environment variable set to: $BRANCH_NAME"
+    echo "Active feature file: $ACTIVE_FEATURE_FILE"
 fi

@@ -271,9 +271,10 @@ Additional commands for enhanced quality and validation:
 
 ### Environment Variables
 
-| Variable          | Description                                                                                                                                                                                                                                                                                            |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `SPECIFY_FEATURE` | Override feature detection for non-Git repositories. Set to the feature directory name (e.g., `001-photo-albums`) to work on a specific feature when not using Git branches.<br/>\*\*Must be set in the context of the agent you're working with prior to using `/speckit.plan` or follow-up commands. |
+| Variable                | Description                                                                                                                                                                                                                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SPECIFY_FEATURE`       | Override feature detection for non-Git repositories. Set to the feature directory name (e.g., `001-photo-albums`) to work on a specific feature when not using Git branches.<br/>\*\*Must be set in the context of the agent you're working with prior to using `/speckit.plan` or follow-up commands. |
+| `SPECIFY_SINGLE_BRANCH` | Enable single-branch mode (`1`, `true`, `yes`, `on`). Spec Kit will read `.specify/active-feature` and skip feature-branch validation.                                                                                                                            |
 
 ## 📚 Core Philosophy
 

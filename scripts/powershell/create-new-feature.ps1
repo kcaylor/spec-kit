@@ -11,6 +11,18 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 
+function Test-SingleBranchMode {
+    $value = $env:SPECIFY_SINGLE_BRANCH
+    if (-not $value) { return $false }
+    switch ($value.ToLower()) {
+        '1' { return $true }
+        'true' { return $true }
+        'yes' { return $true }
+        'on' { return $true }
+        default { return $false }
+    }
+}
+
 # Show help if requested
 if ($Help) {
     Write-Host "Usage: ./create-new-feature.ps1 [-Json] [-ShortName <name>] [-Number N] <feature description>"
@@ -34,6 +46,7 @@ if (-not $FeatureDescription -or $FeatureDescription.Count -eq 0) {
 }
 
 $featureDesc = ($FeatureDescription -join ' ').Trim()
+$singleBranch = Test-SingleBranchMode
 
 # Resolve repository root. Prefer git information when available, but fall back
 # to searching for repository markers so the workflow still functions in repositories that
@@ -208,7 +221,7 @@ if ($ShortName) {
 
 # Determine branch number
 if ($Number -eq 0) {
-    if ($hasGit) {
+    if ($hasGit -and -not $singleBranch) {
         # Check existing branches on remotes
         $Number = Get-NextBranchNumber -SpecsDir $specsDir
     } else {
@@ -243,7 +256,11 @@ if ($branchName.Length -gt $maxBranchLength) {
 
 if ($hasGit) {
     try {
-        git checkout -b $branchName | Out-Null
+        if ($singleBranch) {
+            Write-Warning "[specify] Single-branch mode enabled; skipped branch creation for $branchName"
+        } else {
+            git checkout -b $branchName | Out-Null
+        }
     } catch {
         Write-Warning "Failed to create git branch: $branchName"
     }
@@ -265,12 +282,18 @@ if (Test-Path $template) {
 # Set the SPECIFY_FEATURE environment variable for the current session
 $env:SPECIFY_FEATURE = $branchName
 
+# Persist active feature for single-branch workflows
+$activeFeatureFile = Join-Path $repoRoot '.specify/active-feature'
+New-Item -ItemType Directory -Path (Split-Path $activeFeatureFile) -Force | Out-Null
+Set-Content -Path $activeFeatureFile -Value $branchName
+
 if ($Json) {
     $obj = [PSCustomObject]@{ 
         BRANCH_NAME = $branchName
         SPEC_FILE = $specFile
         FEATURE_NUM = $featureNum
         HAS_GIT = $hasGit
+        ACTIVE_FEATURE_FILE = $activeFeatureFile
     }
     $obj | ConvertTo-Json -Compress
 } else {
@@ -279,5 +302,5 @@ if ($Json) {
     Write-Output "FEATURE_NUM: $featureNum"
     Write-Output "HAS_GIT: $hasGit"
     Write-Output "SPECIFY_FEATURE environment variable set to: $branchName"
+    Write-Output "Active feature file: $activeFeatureFile"
 }
-
