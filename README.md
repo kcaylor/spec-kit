@@ -83,6 +83,37 @@ Run directly without installing:
 uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME>
 ```
 
+#### Using This Fork Locally (Global Specify Already Installed)
+
+If you already have the official CLI installed globally, you can still use this fork side-by-side by invoking it explicitly with `uvx`:
+
+```bash
+# Run this fork without touching your global install
+uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --ai claude
+
+# Check forked CLI version
+uvx --from git+https://github.com/kcaylor/spec-kit.git specify version
+```
+
+Common fork-only features:
+
+```bash
+# Single-branch mode (stay on main, use .specify/active-feature)
+export SPECIFY_SINGLE_BRANCH=1
+
+# Overlay your custom templates on top of official releases
+export SPECIFY_TEMPLATE_OVERLAY_REPO=kcaylor/spec-kit
+
+# Local template packaging from templates/commands/*.md
+uvx --from git+https://github.com/kcaylor/spec-kit.git specify package-templates --ai claude --script sh --out .
+```
+
+If you want a short command, you can alias the forked CLI:
+
+```bash
+alias specify-fork='uvx --from git+https://github.com/kcaylor/spec-kit.git specify'
+```
+
 **Benefits of persistent installation:**
 
 - Tool stays installed and available in PATH
