@@ -69,7 +69,7 @@ uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME
 /speckit.tasks
 ```
 
-Optional: If you use beads/gastown, run `/speckit.taskstoepic` to convert `tasks.md` into beads and (optionally) a convoy for multi-agent orchestration.
+Optional: If you use beads/gastown, run `/speckit.taskstoepic` to convert `tasks.md` into beads and (optionally) a convoy for multi-agent orchestration. You can pass `--prefix hq-` to set a beads ID prefix.
 
 Optionally, validate the plan with `/speckit.analyze`:
 

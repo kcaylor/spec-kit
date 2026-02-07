@@ -63,5 +63,24 @@ if [[ ! -f "$TASK_PARSER" ]]; then
     exit 4
 fi
 
-"$PYTHON_BIN" "$TASK_PARSER" "$FEATURE_DIR" "$TASKS" "$REPO_ROOT" "$@"
+PREFIX=""
+PASS_ARGS=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --prefix)
+            PREFIX="${2:-}"
+            shift 2
+            ;;
+        *)
+            PASS_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+if [[ -n "$PREFIX" ]]; then
+    PASS_ARGS=(--prefix "$PREFIX" "${PASS_ARGS[@]}")
+fi
+
+"$PYTHON_BIN" "$TASK_PARSER" "$FEATURE_DIR" "$TASKS" "$REPO_ROOT" "${PASS_ARGS[@]}"
 exit $?

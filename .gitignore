@@ -11,6 +11,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+!lib/task_parser.py
 lib64/
 parts/
 sdist/
