@@ -2,10 +2,19 @@
 # Common functions and variables for all scripts
 
 is_single_branch_mode() {
+    local repo_root
+    local config_file
     case "${SPECIFY_SINGLE_BRANCH:-}" in
         1|true|TRUE|yes|YES|on|ON) return 0 ;;
-        *) return 1 ;;
+        *) ;;
     esac
+
+    repo_root=$(get_repo_root)
+    config_file="$repo_root/.specify/single-branch"
+    if [[ -f "$config_file" ]]; then
+        return 0
+    fi
+    return 1
 }
 
 # Get repository root, with fallback for non-git repositories

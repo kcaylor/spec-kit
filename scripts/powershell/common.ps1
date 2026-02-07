@@ -132,14 +132,18 @@ function Get-FeaturePathsEnv {
 
 function Test-SingleBranchMode {
     $value = $env:SPECIFY_SINGLE_BRANCH
-    if (-not $value) { return $false }
-    switch ($value.ToLower()) {
-        '1' { return $true }
-        'true' { return $true }
-        'yes' { return $true }
-        'on' { return $true }
-        default { return $false }
+    if ($value) {
+        switch ($value.ToLower()) {
+            '1' { return $true }
+            'true' { return $true }
+            'yes' { return $true }
+            'on' { return $true }
+        }
     }
+
+    $repoRoot = Get-RepoRoot
+    $configFile = Join-Path $repoRoot '.specify/single-branch'
+    return (Test-Path $configFile)
 }
 
 function Test-FileExists {

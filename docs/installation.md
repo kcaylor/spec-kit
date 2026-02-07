@@ -81,7 +81,13 @@ If you prefer to keep your repo on `main`, enable single-branch mode:
 export SPECIFY_SINGLE_BRANCH=1
 ```
 
-Spec Kit will read `.specify/active-feature` and skip feature-branch validation. You can still override the feature with `SPECIFY_FEATURE`.
+Or set it once during init:
+
+```bash
+specify init --here --ai claude --single-branch
+```
+
+Spec Kit will read `.specify/active-feature` and `.specify/single-branch` and skip feature-branch validation. You can still override the feature with `SPECIFY_FEATURE`.
 
 ## Troubleshooting
 

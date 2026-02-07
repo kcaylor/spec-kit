@@ -91,6 +91,9 @@ If you already have the official CLI installed globally, you can still use this 
 # Run this fork without touching your global install
 uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --ai claude
 
+# Single-branch init (stay on main, writes .specify/single-branch)
+uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --ai claude --single-branch
+
 # Check forked CLI version
 uvx --from git+https://github.com/kcaylor/spec-kit.git specify version
 ```

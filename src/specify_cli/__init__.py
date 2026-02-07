@@ -1082,6 +1082,7 @@ def init(
     script_type: str = typer.Option(None, "--script", help="Script type to use: sh or ps"),
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools like Claude Code"),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository initialization"),
+    single_branch: bool = typer.Option(False, "--single-branch", help="Enable single-branch mode and skip feature branch validation"),
     here: bool = typer.Option(False, "--here", help="Initialize project in the current directory instead of creating a new one"),
     force: bool = typer.Option(False, "--force", help="Force merge/overwrite when using --here (skip confirmation)"),
     skip_tls: bool = typer.Option(False, "--skip-tls", help="Skip SSL/TLS verification (not recommended)"),
@@ -1240,6 +1241,7 @@ def init(
         ("extract", "Extract template"),
         ("zip-list", "Archive contents"),
         ("extracted-summary", "Extraction summary"),
+        ("single-branch", "Single-branch config"),
         ("chmod", "Ensure scripts executable"),
         ("cleanup", "Cleanup"),
         ("git", "Initialize git repository"),
@@ -1286,6 +1288,15 @@ def init(
             )
 
             ensure_executable_scripts(project_path, tracker=tracker)
+
+            if single_branch:
+                tracker.start("single-branch")
+                single_branch_file = project_path / ".specify" / "single-branch"
+                single_branch_file.parent.mkdir(parents=True, exist_ok=True)
+                single_branch_file.write_text("1\n", encoding="utf-8")
+                tracker.complete("single-branch", str(single_branch_file))
+            else:
+                tracker.skip("single-branch", "not enabled")
 
             if not no_git:
                 tracker.start("git")

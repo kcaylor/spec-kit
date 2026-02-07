@@ -42,18 +42,22 @@ while [ $i -le $# ]; do
             BRANCH_NUMBER="$next_arg"
             ;;
         --help|-h) 
-            echo "Usage: $0 [--json] [--short-name <name>] [--number N] <feature_description>"
+            echo "Usage: $0 [--json] [--short-name <name>] [--number N] [--single-branch] <feature_description>"
             echo ""
             echo "Options:"
             echo "  --json              Output in JSON format"
             echo "  --short-name <name> Provide a custom short name (2-4 words) for the branch"
             echo "  --number N          Specify branch number manually (overrides auto-detection)"
+            echo "  --single-branch     Enable single-branch mode (stay on main)"
             echo "  --help, -h          Show this help message"
             echo ""
             echo "Examples:"
             echo "  $0 'Add user authentication system' --short-name 'user-auth'"
             echo "  $0 'Implement OAuth2 integration for API' --number 5"
             exit 0
+            ;;
+        --single-branch)
+            SINGLE_BRANCH=true
             ;;
         *) 
             ARGS+=("$arg") 
@@ -64,7 +68,7 @@ done
 
 FEATURE_DESCRIPTION="${ARGS[*]}"
 if [ -z "$FEATURE_DESCRIPTION" ]; then
-    echo "Usage: $0 [--json] [--short-name <name>] [--number N] <feature_description>" >&2
+    echo "Usage: $0 [--json] [--short-name <name>] [--number N] [--single-branch] <feature_description>" >&2
     exit 1
 fi
 
@@ -181,6 +185,11 @@ cd "$REPO_ROOT"
 
 SPECS_DIR="$REPO_ROOT/specs"
 mkdir -p "$SPECS_DIR"
+
+SINGLE_BRANCH_CONFIG="$REPO_ROOT/.specify/single-branch"
+if [[ -f "$SINGLE_BRANCH_CONFIG" ]]; then
+    SINGLE_BRANCH=true
+fi
 
 # Function to generate branch name with stop word filtering and length filtering
 generate_branch_name() {
@@ -301,12 +310,20 @@ ACTIVE_FEATURE_FILE="$REPO_ROOT/.specify/active-feature"
 mkdir -p "$(dirname "$ACTIVE_FEATURE_FILE")"
 echo "$BRANCH_NAME" > "$ACTIVE_FEATURE_FILE"
 
+if [ "$SINGLE_BRANCH" = true ]; then
+    mkdir -p "$(dirname "$SINGLE_BRANCH_CONFIG")"
+    echo "1" > "$SINGLE_BRANCH_CONFIG"
+fi
+
 if $JSON_MODE; then
-    printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s","ACTIVE_FEATURE_FILE":"%s"}\n' "$BRANCH_NAME" "$SPEC_FILE" "$FEATURE_NUM" "$ACTIVE_FEATURE_FILE"
+    printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s","ACTIVE_FEATURE_FILE":"%s","SINGLE_BRANCH_CONFIG":"%s"}\n' "$BRANCH_NAME" "$SPEC_FILE" "$FEATURE_NUM" "$ACTIVE_FEATURE_FILE" "$SINGLE_BRANCH_CONFIG"
 else
     echo "BRANCH_NAME: $BRANCH_NAME"
     echo "SPEC_FILE: $SPEC_FILE"
     echo "FEATURE_NUM: $FEATURE_NUM"
     echo "SPECIFY_FEATURE environment variable set to: $BRANCH_NAME"
     echo "Active feature file: $ACTIVE_FEATURE_FILE"
+    if [ "$SINGLE_BRANCH" = true ]; then
+        echo "Single-branch config file: $SINGLE_BRANCH_CONFIG"
+    fi
 fi

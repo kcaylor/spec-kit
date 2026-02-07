@@ -5,6 +5,7 @@ param(
     [switch]$Json,
     [string]$ShortName,
     [int]$Number = 0,
+    [switch]$SingleBranch,
     [switch]$Help,
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$FeatureDescription
@@ -13,24 +14,31 @@ $ErrorActionPreference = 'Stop'
 
 function Test-SingleBranchMode {
     $value = $env:SPECIFY_SINGLE_BRANCH
-    if (-not $value) { return $false }
-    switch ($value.ToLower()) {
-        '1' { return $true }
-        'true' { return $true }
-        'yes' { return $true }
-        'on' { return $true }
-        default { return $false }
+    if ($value) {
+        switch ($value.ToLower()) {
+            '1' { return $true }
+            'true' { return $true }
+            'yes' { return $true }
+            'on' { return $true }
+        }
     }
+
+    if ($script:RepoRoot) {
+        $configFile = Join-Path $script:RepoRoot '.specify/single-branch'
+        return (Test-Path $configFile)
+    }
+    return $false
 }
 
 # Show help if requested
 if ($Help) {
-    Write-Host "Usage: ./create-new-feature.ps1 [-Json] [-ShortName <name>] [-Number N] <feature description>"
+    Write-Host "Usage: ./create-new-feature.ps1 [-Json] [-ShortName <name>] [-Number N] [-SingleBranch] <feature description>"
     Write-Host ""
     Write-Host "Options:"
     Write-Host "  -Json               Output in JSON format"
     Write-Host "  -ShortName <name>   Provide a custom short name (2-4 words) for the branch"
     Write-Host "  -Number N           Specify branch number manually (overrides auto-detection)"
+    Write-Host "  -SingleBranch       Enable single-branch mode (stay on main)"
     Write-Host "  -Help               Show this help message"
     Write-Host ""
     Write-Host "Examples:"
@@ -41,12 +49,11 @@ if ($Help) {
 
 # Check if feature description provided
 if (-not $FeatureDescription -or $FeatureDescription.Count -eq 0) {
-    Write-Error "Usage: ./create-new-feature.ps1 [-Json] [-ShortName <name>] <feature description>"
+    Write-Error "Usage: ./create-new-feature.ps1 [-Json] [-ShortName <name>] [-Number N] [-SingleBranch] <feature description>"
     exit 1
 }
 
 $featureDesc = ($FeatureDescription -join ' ').Trim()
-$singleBranch = Test-SingleBranchMode
 
 # Resolve repository root. Prefer git information when available, but fall back
 # to searching for repository markers so the workflow still functions in repositories that
@@ -159,6 +166,8 @@ try {
     $repoRoot = $fallbackRoot
     $hasGit = $false
 }
+$script:RepoRoot = $repoRoot
+$singleBranch = $SingleBranch -or (Test-SingleBranchMode)
 
 Set-Location $repoRoot
 
@@ -287,6 +296,12 @@ $activeFeatureFile = Join-Path $repoRoot '.specify/active-feature'
 New-Item -ItemType Directory -Path (Split-Path $activeFeatureFile) -Force | Out-Null
 Set-Content -Path $activeFeatureFile -Value $branchName
 
+if ($singleBranch) {
+    $singleBranchFile = Join-Path $repoRoot '.specify/single-branch'
+    New-Item -ItemType Directory -Path (Split-Path $singleBranchFile) -Force | Out-Null
+    Set-Content -Path $singleBranchFile -Value '1'
+}
+
 if ($Json) {
     $obj = [PSCustomObject]@{ 
         BRANCH_NAME = $branchName
@@ -294,6 +309,7 @@ if ($Json) {
         FEATURE_NUM = $featureNum
         HAS_GIT = $hasGit
         ACTIVE_FEATURE_FILE = $activeFeatureFile
+        SINGLE_BRANCH = $singleBranch
     }
     $obj | ConvertTo-Json -Compress
 } else {
