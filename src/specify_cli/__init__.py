@@ -1483,6 +1483,8 @@ def version():
     
     # Fetch latest template release version
     template_repo_value = os.getenv("SPECIFY_TEMPLATE_REPO")
+    overlay_repo_value = os.getenv("SPECIFY_TEMPLATE_OVERLAY_REPO")
+    overlay_path_value = os.getenv("SPECIFY_TEMPLATE_OVERLAY_PATH")
     repo_owner, repo_name = _parse_template_repo(template_repo_value)
     api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
     
@@ -1520,6 +1522,12 @@ def version():
     info_table.add_row("CLI Version", cli_version)
     info_table.add_row("Template Version", template_version)
     info_table.add_row("Released", release_date)
+    if template_repo_value:
+        info_table.add_row("Template Repo", template_repo_value)
+    if overlay_repo_value:
+        info_table.add_row("Overlay Repo", overlay_repo_value)
+    if overlay_path_value:
+        info_table.add_row("Overlay Path", overlay_path_value)
     info_table.add_row("", "")
     info_table.add_row("Python", platform.python_version())
     info_table.add_row("Platform", platform.system())
