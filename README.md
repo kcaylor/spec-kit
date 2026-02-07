@@ -105,7 +105,7 @@ Common fork-only features:
 export SPECIFY_SINGLE_BRANCH=1
 
 # Overlay your custom templates on top of official releases
-export SPECIFY_TEMPLATE_OVERLAY_REPO=kcaylor/spec-kit
+uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --force --ai claude --template-overlay-repo kcaylor/spec-kit
 
 # Local template packaging from templates/commands/*.md
 uvx --from git+https://github.com/kcaylor/spec-kit.git specify package-templates --ai claude --script sh --out .

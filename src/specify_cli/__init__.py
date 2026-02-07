@@ -1083,6 +1083,9 @@ def init(
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools like Claude Code"),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository initialization"),
     single_branch: bool = typer.Option(False, "--single-branch", help="Enable single-branch mode and skip feature branch validation"),
+    template_repo: str = typer.Option(None, "--template-repo", help="Override template repo (owner/name or GitHub URL)"),
+    template_overlay_repo: str = typer.Option(None, "--template-overlay-repo", help="Overlay templates from repo (owner/name or GitHub URL)"),
+    template_overlay_path: str = typer.Option(None, "--template-overlay-path", help="Overlay templates from local directory or .zip"),
     here: bool = typer.Option(False, "--here", help="Initialize project in the current directory instead of creating a new one"),
     force: bool = typer.Option(False, "--force", help="Force merge/overwrite when using --here (skip confirmation)"),
     skip_tls: bool = typer.Option(False, "--skip-tls", help="Skip SSL/TLS verification (not recommended)"),
@@ -1112,6 +1115,7 @@ def init(
         specify init --here --ai codebuddy
         specify init --here
         specify init --here --force  # Skip confirmation when current directory not empty
+        specify init --here --ai claude --template-overlay-repo owner/name
     """
 
     show_banner()
@@ -1259,9 +1263,9 @@ def init(
             local_ssl_context = ssl_context if verify else False
             local_client = httpx.Client(verify=local_ssl_context)
 
-            template_repo_value = os.getenv("SPECIFY_TEMPLATE_REPO")
-            overlay_repo_value = os.getenv("SPECIFY_TEMPLATE_OVERLAY_REPO")
-            overlay_path_value = os.getenv("SPECIFY_TEMPLATE_OVERLAY_PATH")
+            template_repo_value = template_repo or os.getenv("SPECIFY_TEMPLATE_REPO")
+            overlay_repo_value = template_overlay_repo or os.getenv("SPECIFY_TEMPLATE_OVERLAY_REPO")
+            overlay_path_value = template_overlay_path or os.getenv("SPECIFY_TEMPLATE_OVERLAY_PATH")
 
             base_repo_owner, base_repo_name = _parse_template_repo(template_repo_value)
             overlay_repo_owner = None

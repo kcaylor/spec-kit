@@ -26,11 +26,23 @@ SPECIFY_TEMPLATE_OVERLAY_REPO=kcaylor/spec-kit \
 uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --force --ai claude
 ```
 
+Or use the CLI flag:
+
+```bash
+uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --force --ai claude --template-overlay-repo kcaylor/spec-kit
+```
+
 ### Overlay from a local directory or ZIP
 
 ```bash
 SPECIFY_TEMPLATE_OVERLAY_PATH=/absolute/path/to/overlay \
 uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --force --ai claude
+```
+
+Or use the CLI flag:
+
+```bash
+uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --force --ai claude --template-overlay-path /absolute/path/to/overlay
 ```
 
 The overlay must mirror the structure of a packaged template (for example, `.claude/commands/`).
