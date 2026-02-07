@@ -53,5 +53,15 @@ if ! command -v bd >/dev/null 2>&1; then
 fi
 
 PYTHON_BIN="${PYTHON_BIN:-python}"
-"$PYTHON_BIN" "$REPO_ROOT/.specify/lib/task_parser.py" "$FEATURE_DIR" "$TASKS" "$REPO_ROOT" "$@"
+TASK_PARSER="$REPO_ROOT/.specify/lib/task_parser.py"
+if [[ ! -f "$TASK_PARSER" ]]; then
+    TASK_PARSER="$REPO_ROOT/lib/task_parser.py"
+fi
+
+if [[ ! -f "$TASK_PARSER" ]]; then
+    echo "ERROR: task_parser.py not found in .specify/lib or lib." >&2
+    exit 4
+fi
+
+"$PYTHON_BIN" "$TASK_PARSER" "$FEATURE_DIR" "$TASKS" "$REPO_ROOT" "$@"
 exit $?

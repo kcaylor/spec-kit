@@ -83,4 +83,5 @@ specify package-templates --ai copilot --script sh --out . --include-vscode-sett
   - `{SCRIPT}` is replaced with the selected script variant command.
   - `{ARGS}` becomes `$ARGUMENTS` (Markdown agents) or `{{args}}` (TOML agents).
   - `memory/`, `scripts/`, and `templates/` paths are rewritten to `.specify/` paths.
+- If `lib/` exists, it is copied to `.specify/lib/` for helper scripts (e.g., `task_parser.py`).
 - For Copilot, the tool generates `.github/prompts/` entries alongside `.github/agents/`.

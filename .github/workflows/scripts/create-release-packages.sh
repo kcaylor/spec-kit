@@ -132,6 +132,12 @@ build_variant() {
   mkdir -p "$SPEC_DIR"
   
   [[ -d memory ]] && { cp -r memory "$SPEC_DIR/"; echo "Copied memory -> .specify"; }
+
+  if [[ -d lib ]]; then
+    mkdir -p "$SPEC_DIR/lib"
+    cp -r lib/* "$SPEC_DIR/lib/" || true
+    echo "Copied lib -> .specify/lib"
+  fi
   
   # Only copy the relevant script variant directory
   if [[ -d scripts ]]; then
@@ -270,4 +276,3 @@ done
 
 echo "Archives in $GENRELEASES_DIR:"
 ls -1 "$GENRELEASES_DIR"/spec-kit-template-*-"${NEW_VERSION}".zip
-

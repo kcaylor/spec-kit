@@ -220,6 +220,20 @@ function Build-Variant {
         Copy-Item -Path "memory" -Destination $specDir -Recurse -Force
         Write-Host "Copied memory -> .specify"
     }
+
+    if (Test-Path "lib") {
+        $libDir = Join-Path $specDir "lib"
+        New-Item -ItemType Directory -Path $libDir -Force | Out-Null
+        Copy-Item -Path "lib/*" -Destination $libDir -Recurse -Force
+        Write-Host "Copied lib -> .specify/lib"
+    }
+
+    if (Test-Path "lib") {
+        $libDir = Join-Path $specDir "lib"
+        New-Item -ItemType Directory -Path $libDir -Force | Out-Null
+        Copy-Item -Path "lib/*" -Destination $libDir -Recurse -Force
+        Write-Host "Copied lib -> .specify/lib"
+    }
     
     # Only copy the relevant script variant directory
     if (Test-Path "scripts") {

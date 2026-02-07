@@ -205,6 +205,15 @@ def build_commands(
 
     written: list[Path] = []
 
+    lib_dir = Path("lib")
+    if lib_dir.exists():
+        dest_lib = output_dir / ".specify" / "lib"
+        dest_lib.mkdir(parents=True, exist_ok=True)
+        for item in lib_dir.iterdir():
+            if item.is_file():
+                shutil.copy2(item, dest_lib / item.name)
+                written.append(dest_lib / item.name)
+
     for template_path in templates:
         result = parse_template(template_path, script_variant=script_variant)
         rendered = render_template(result, agent=agent, arg_format=arg_format)
