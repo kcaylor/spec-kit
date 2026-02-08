@@ -1083,6 +1083,7 @@ def init(
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools like Claude Code"),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository initialization"),
     single_branch: bool = typer.Option(False, "--single-branch", help="Enable single-branch mode and skip feature branch validation"),
+    beads_prefix: str = typer.Option(None, "--beads-prefix", help="Default beads ID prefix for /speckit.taskstoepic (example: hq-)"),
     template_repo: str = typer.Option(None, "--template-repo", help="Override template repo (owner/name or GitHub URL)"),
     template_overlay_repo: str = typer.Option(None, "--template-overlay-repo", help="Overlay templates from repo (owner/name or GitHub URL)"),
     template_overlay_path: str = typer.Option(None, "--template-overlay-path", help="Overlay templates from local directory or .zip"),
@@ -1116,6 +1117,7 @@ def init(
         specify init --here
         specify init --here --force  # Skip confirmation when current directory not empty
         specify init --here --ai claude --template-overlay-repo owner/name
+        specify init --here --ai claude --beads-prefix hq-
     """
 
     show_banner()
@@ -1246,6 +1248,7 @@ def init(
         ("zip-list", "Archive contents"),
         ("extracted-summary", "Extraction summary"),
         ("single-branch", "Single-branch config"),
+        ("beads-prefix", "Beads prefix config"),
         ("chmod", "Ensure scripts executable"),
         ("cleanup", "Cleanup"),
         ("git", "Initialize git repository"),
@@ -1301,6 +1304,15 @@ def init(
                 tracker.complete("single-branch", str(single_branch_file))
             else:
                 tracker.skip("single-branch", "not enabled")
+
+            if beads_prefix:
+                tracker.start("beads-prefix")
+                beads_prefix_file = project_path / ".specify" / "beads-prefix"
+                beads_prefix_file.parent.mkdir(parents=True, exist_ok=True)
+                beads_prefix_file.write_text(f"{beads_prefix}\n", encoding="utf-8")
+                tracker.complete("beads-prefix", str(beads_prefix_file))
+            else:
+                tracker.skip("beads-prefix", "not enabled")
 
             if not no_git:
                 tracker.start("git")

@@ -94,6 +94,9 @@ uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --ai 
 # Single-branch init (stay on main, writes .specify/single-branch)
 uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --ai claude --single-branch
 
+# Set a default beads prefix for /speckit.taskstoepic
+uvx --from git+https://github.com/kcaylor/spec-kit.git specify init --here --ai claude --beads-prefix hq-
+
 # Check forked CLI version
 uvx --from git+https://github.com/kcaylor/spec-kit.git specify version
 ```

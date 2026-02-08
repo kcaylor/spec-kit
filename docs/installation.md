@@ -89,6 +89,16 @@ specify init --here --ai claude --single-branch
 
 Spec Kit will read `.specify/active-feature` and `.specify/single-branch` and skip feature-branch validation. You can still override the feature with `SPECIFY_FEATURE`.
 
+## Beads Prefix Defaults
+
+If you use beads, you can set a default prefix for `/speckit.taskstoepic` during init:
+
+```bash
+specify init --here --ai claude --beads-prefix hq-
+```
+
+This writes `.specify/beads-prefix`, which the helper script will use when no `--prefix` argument is supplied.
+
 ## Troubleshooting
 
 ### Git Credential Manager on Linux

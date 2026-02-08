@@ -63,7 +63,10 @@ if [[ ! -f "$TASK_PARSER" ]]; then
     exit 4
 fi
 
-PREFIX=""
+PREFIX="${SPECIFY_BEADS_PREFIX:-}"
+if [[ -z "$PREFIX" && -f "$REPO_ROOT/.specify/beads-prefix" ]]; then
+    PREFIX="$(head -n1 "$REPO_ROOT/.specify/beads-prefix" | tr -d '[:space:]')"
+fi
 PASS_ARGS=()
 while [[ $# -gt 0 ]]; do
     case "$1" in

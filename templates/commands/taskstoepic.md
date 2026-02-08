@@ -16,6 +16,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 1. Run `{SCRIPT}` from repo root, passing `$ARGUMENTS` through unchanged.
    - Optional: `--prefix <value>` to set a beads ID prefix (example: `--prefix hq-`).
+   - If no `--prefix` is supplied, the helper will use `.specify/beads-prefix` when present.
 2. If the helper script reports missing prerequisites, stop and show the error.
 3. On success, report created bead IDs, skipped duplicates, and convoy details (if any).
 
