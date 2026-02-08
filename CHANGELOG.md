@@ -7,6 +7,10 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.37] - 2026-02-08
+
+- Fix `/speckit.taskstoepic` helper to correctly read prerequisite JSON via stdin.
+
 ## [0.0.36] - 2026-02-08
 
 - Avoid creating empty parent beads in `/speckit.taskstoepic` and include phase/story metadata in task beads.

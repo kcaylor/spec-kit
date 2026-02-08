@@ -27,14 +27,10 @@ if [[ -z "$CHECK_OUTPUT" ]]; then
     exit 1
 fi
 
-FEATURE_DIR=$(python - <<'PY'
-import json
-import sys
-payload = sys.stdin.read()
-data = json.loads(payload)
-print(data.get("FEATURE_DIR", ""))
-PY
-<<<"$CHECK_OUTPUT")
+FEATURE_DIR=$(
+    python -c 'import json,sys; payload=sys.stdin.read(); data=json.loads(payload); print(data.get("FEATURE_DIR",""))' \
+        <<<"$CHECK_OUTPUT"
+)
 
 if [[ -z "$FEATURE_DIR" ]]; then
     echo "ERROR: Feature directory could not be determined." >&2
