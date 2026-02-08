@@ -30,7 +30,7 @@ TASK_PATTERN = re.compile(
 # Explicit dependency notation within a task description
 DEPENDS_PATTERN = re.compile(r"\(depends on (T\d{3}(?:,\s*T\d{3})*)\)")
 PHASE_HEADER_PATTERN = re.compile(r"^##\s+Phase\s+\d+:\s+(.+)$")
-BEAD_ID_PATTERN = re.compile(r"\b(bd-[A-Za-z0-9]+(?:\.\d+)*)\b")
+BEAD_ID_PATTERN = re.compile(r"\b([A-Za-z][A-Za-z0-9]*-[A-Za-z0-9]+(?:\.\d+)*)\b")
 CONVOY_ID_PATTERN = re.compile(r"\b(gt-[A-Za-z0-9]+)\b")
 
 PHASE_PRIORITY_MAP = {
@@ -40,7 +40,7 @@ PHASE_PRIORITY_MAP = {
     "User Story 2": 3,
     "User Story 3": 4,
     "User Story 4": 5,
-    "Polish": 9,
+    "Polish": 4,
 }
 
 DEFAULT_PRIORITY = 5
@@ -146,11 +146,11 @@ def _map_priority_from_phase(phase_name: str) -> int:
     """Map a phase name to a beads priority number."""
     for key, priority in PHASE_PRIORITY_MAP.items():
         if key in phase_name:
-            return priority
+            return min(max(priority, 0), 4)
     match = re.search(r"Priority:\s*P(\d+)", phase_name)
     if match:
-        return int(match.group(1)) + 1
-    return DEFAULT_PRIORITY
+        return min(max(int(match.group(1)) + 1, 0), 4)
+    return min(max(DEFAULT_PRIORITY, 0), 4)
 
 
 def _extract_file_path(description: str) -> Optional[str]:
@@ -485,7 +485,7 @@ def create_bead(
     if parent_id:
         args += ["--parent", parent_id]
     if description:
-        args += ["--desc", description]
+        args += ["--description", description]
     args.append(title)
 
     code, stdout, stderr = run_bd_command(args, timeout=timeout)
