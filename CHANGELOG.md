@@ -7,6 +7,10 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.32] - 2026-02-07
+
+- Prevent `[specify]` warnings from polluting JSON output in prerequisite checks.
+
 ## [0.0.31] - 2026-02-07
 
 - Add `--prefix` support to `/speckit.taskstoepic` and task parser.

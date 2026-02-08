@@ -85,6 +85,13 @@ function Test-FeatureBranch {
         [bool]$HasGit = $true
     )
 
+    if ($env:SPECIFY_JSON) {
+        if (Test-SingleBranchMode) { return $true }
+        if (-not $HasGit) { return $true }
+        if ($Branch -notmatch '^[0-9]{3}-') { return $false }
+        return $true
+    }
+
     if (Test-SingleBranchMode) {
         Write-Warning "[specify] Single-branch mode enabled; skipped branch validation"
         return $true

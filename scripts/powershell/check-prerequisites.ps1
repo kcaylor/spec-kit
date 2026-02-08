@@ -53,6 +53,8 @@ EXAMPLES:
     exit 0
 }
 
+$env:SPECIFY_JSON = if ($Json) { '1' } else { '' }
+
 # Source common functions
 . "$PSScriptRoot/common.ps1"
 

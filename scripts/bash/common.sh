@@ -98,6 +98,19 @@ check_feature_branch() {
     local branch="$1"
     local has_git_repo="$2"
 
+    if [[ -n "${SPECIFY_JSON:-}" ]]; then
+        if is_single_branch_mode; then
+            return 0
+        fi
+        if [[ "$has_git_repo" != "true" ]]; then
+            return 0
+        fi
+        if [[ ! "$branch" =~ ^[0-9]{3}- ]]; then
+            return 1
+        fi
+        return 0
+    fi
+
     if is_single_branch_mode; then
         echo "[specify] Single-branch mode enabled; skipped branch validation" >&2
         return 0

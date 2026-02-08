@@ -31,6 +31,7 @@ for arg in "$@"; do
     case "$arg" in
         --json)
             JSON_MODE=true
+            export SPECIFY_JSON=1
             ;;
         --require-tasks)
             REQUIRE_TASKS=true
