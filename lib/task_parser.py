@@ -212,6 +212,11 @@ def parse_tasks_file(tasks_path: Path) -> list[Task]:
         description_raw = match.group(4).strip()
 
         dependencies, description = parse_dependencies(description_raw)
+        if not description.strip():
+            sys.stderr.write(
+                f"Warning: Skipping empty task description at line {index} ({task_id})\n"
+            )
+            continue
         file_path = _extract_file_path(description)
         phase_priority = _map_priority_from_phase(current_phase)
 
@@ -426,7 +431,13 @@ def get_context_files(feature_dir: Path) -> list[Path]:
 
 def format_bead_description(task: Task, context_files: list[Path], repo_root: Optional[Path]) -> str:
     """Format bead description with task details and context file references."""
-    lines = [task.description]
+    lines = []
+    if task.phase_name:
+        lines.append(f"Phase: {task.phase_name}")
+    if task.user_story:
+        lines.append(f"User Story: {task.user_story}")
+    lines.append("")
+    lines.append(task.description)
     if task.file_path:
         lines.append("")
         lines.append(f"File: {task.file_path}")
@@ -522,9 +533,7 @@ def create_beads_from_tasks(
 ) -> dict[str, Any]:
     """Create beads for tasks and update mapping. Returns result stats."""
     context_files = get_context_files(feature_dir)
-    parent_beads = _get_parent_beads_from_stats(mapping)
     created_beads: list[tuple[str, str]] = []
-    created_parents: list[tuple[str, str]] = []
     failed: dict[str, str] = {}
     skipped: list[str] = []
 
@@ -532,40 +541,19 @@ def create_beads_from_tasks(
     skipped = [task.task_id for task in existing_tasks]
 
     for task in new_tasks:
-        parent_key, parent_title = determine_parent_bead(task)
-        parent_id = parent_beads.get(parent_key)
-        if not parent_id:
-            try:
-                parent_id = create_bead(
-                    title=_truncate_title(parent_title),
-                    priority=task.phase_priority,
-                    description=parent_title,
-                    prefix=prefix,
-                )
-                parent_beads[parent_key] = parent_id
-                created_parents.append((parent_title, parent_id))
-                _set_parent_beads_in_stats(mapping, parent_beads)
-                _log_line(log_file, f"Created parent bead {parent_id} for {parent_key}")
-                save_mapping(mapping, feature_dir)
-            except Exception as exc:
-                failed[task.task_id] = str(exc)
-                _log_line(log_file, f"Failed to create parent bead for {task.task_id}: {exc}")
-                continue
-
         description = format_bead_description(task, context_files, repo_root)
         try:
             bead_id = create_bead(
                 title=_truncate_title(task.description),
                 priority=task.phase_priority,
                 description=description,
-                parent_id=parent_id,
                 prefix=prefix,
             )
             mapping.mappings[task.task_id] = BeadMappingEntry(
                 bead_id=bead_id,
                 created_at=_now_iso(),
                 title=task.description,
-                parent_bead_id=parent_id,
+                parent_bead_id=None,
             )
             created_beads.append((task.task_id, bead_id))
             save_mapping(mapping, feature_dir)
@@ -577,10 +565,10 @@ def create_beads_from_tasks(
 
     return {
         "created": created_beads,
-        "created_parents": created_parents,
+        "created_parents": [],
         "skipped": skipped,
         "failed": failed,
-        "parent_beads": parent_beads,
+        "parent_beads": {},
     }
 
 
@@ -691,10 +679,8 @@ def create_convoy(
 
 
 def _collect_bead_ids(mapping: TaskBeadMapping) -> list[str]:
-    """Collect all bead IDs (including parent beads) for convoy creation."""
+    """Collect all bead IDs for convoy creation."""
     bead_ids = {entry.bead_id for entry in mapping.mappings.values()}
-    parent_beads = _get_parent_beads_from_stats(mapping)
-    bead_ids.update(parent_beads.values())
     return sorted(bead_ids)
 
 
