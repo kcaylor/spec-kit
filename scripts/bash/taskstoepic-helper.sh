@@ -11,13 +11,18 @@ if [[ ! -x "$CHECK_SCRIPT" ]]; then
     exit 1
 fi
 
-CHECK_OUTPUT="$($CHECK_SCRIPT --json --require-tasks --include-tasks 2>/tmp/taskstoepic-prereq.err || true)"
-CHECK_STATUS=$?
-if [[ $CHECK_STATUS -ne 0 ]]; then
+CHECK_OUTPUT=""
+if ! CHECK_OUTPUT="$($CHECK_SCRIPT --json --require-tasks --include-tasks 2>/tmp/taskstoepic-prereq.err)"; then
     if grep -q "tasks.md not found" /tmp/taskstoepic-prereq.err; then
         echo "ERROR: tasks.md not found in feature directory. Run /speckit.tasks first." >&2
         exit 1
     fi
+    cat /tmp/taskstoepic-prereq.err >&2
+    exit 1
+fi
+
+if [[ -z "$CHECK_OUTPUT" ]]; then
+    echo "ERROR: Prerequisite check returned no output." >&2
     cat /tmp/taskstoepic-prereq.err >&2
     exit 1
 fi
